@@ -475,7 +475,10 @@ class SortedKmerTxtReader : public KmerReader<keyType> {
         keyType k = vK->at(i);
         writer.write(&k);
       }
-      for (uint64_t k : *vK) writer.write(&k);
+      for (int i = 0; i < vK->size(); ++i) {
+        keyType k = vK->at(i);
+        writer.write(&k);
+      }
       writer.finish();
       binaryReader = new BinaryKmerReader<keyType>(binaryfilename.c_str());
     } else
@@ -521,7 +524,9 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
 
  public:
   void finish() {
-    for (auto f : fV) fclose(f);
+    for (int i = 0; i < fV.size(); ++i) {
+      fclose(fV[i]);
+    }
   }
   void reset() { printf(" Do not support reset() \n"); }
   int levelcount;
@@ -540,7 +545,8 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
                  const char *tmpfolder) {
     vector<KmerReader<keyType> *> readers;
     priority_queue<KIDpair> PQN;
-    for (string s : lf) {
+    for (int i = 0; i < lf.size(); ++i) {
+      string s = lf[i];
       string fname = prefix + s + suffix;
       if (useBinaryKmerFile)
         readers.push_back(new BinaryKmerReader<keyType>(fname.c_str()));
@@ -660,7 +666,8 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
         delete fnamesInThisgrp;
       }
       combineCount = grpfnames.size();
-      for (string v : grpfnames) {
+      for (int i = 0; i < grpfnames.size(); ++i) {
+        string v = grpfnames[i];
         grpreaders.push_back(new MultivalueFileReaderWriter<uint64_t, uint16_t>(
             v.c_str(), 8, 2, true));
         keyType key;
