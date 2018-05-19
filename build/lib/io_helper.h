@@ -239,7 +239,7 @@ class MultivalueFileReaderWriter : public FileReader<keyType, valueType> {
   unsigned char buf[buflen * 2];
   uint32_t kl, vl;
   bool isRead;
-  bool isclosed = false;
+  bool isclosed;
 
  public:
   static const valueType EMPTYVALUE = ~0;
@@ -252,6 +252,7 @@ class MultivalueFileReaderWriter : public FileReader<keyType, valueType> {
                              uint32_t valuelength, bool _isRead) {
     curr = 0;
     max = 0;
+    isclosed = false;
     kl = klength;
     vl = valuelength;
     char buf[1024];
@@ -347,7 +348,8 @@ class MultivalueFileReaderWriter : public FileReader<keyType, valueType> {
     if (vl == 1) p = &a8;
     if (vl == 2) p = &a16;
     if (vl == 4) p = &a32;
-    for (auto v : vv) {
+    for (int i = 0; i < vv.size(); ++i) {
+      valueType v = vv[i];
       a8 = a16 = a32 = v;
       add(p, vl);
     }
@@ -374,12 +376,13 @@ class BinaryKmerReader : public KmerReader<KVpair> {
   KVpair buff[1024];
   int curr;
   int max;
-  bool isclosed = false;
+  bool isclosed;
 
  public:
   BinaryKmerReader(const char *fname) {
     curr = 0;
     max = 0;
+    isclosed = false;
     char buf[1024];
     strcpy(buf, fname);
     if (buf[strlen(buf) - 1] == '\n') buf[strlen(buf) - 1] = '\0';
@@ -446,13 +449,14 @@ class BinaryKmerWriter {
 //! read kmer from unsorted txt file and sort .
 template <typename keyType>
 class SortedKmerTxtReader : public KmerReader<keyType> {
-  BinaryKmerReader<keyType> *binaryReader = NULL;
+  BinaryKmerReader<keyType> *binaryReader;
   uint32_t pointer;
   vector<keyType> *vK;
 
  public:
   SortedKmerTxtReader(const char *fname, uint32_t kmerlength,
                       const char *tmpfilename) {
+    binaryReader = NULL;
     ConstantLengthKmerHelper<keyType, uint64_t> helper(kmerlength, 0);
     FileReader<keyType, uint64_t> *reader;
     reader = new KmerFileReader<keyType, uint64_t>(fname, &helper, false);
@@ -467,6 +471,10 @@ class SortedKmerTxtReader : public KmerReader<keyType> {
     if (tmpfilename != NULL) {
       string binaryfilename(tmpfilename);
       BinaryKmerWriter<keyType> writer(binaryfilename.c_str());
+      for (int i = 0; i < vK->size(); ++i) {
+        keyType k = vK->at(i);
+        writer.write(&k);
+      }
       for (uint64_t k : *vK) writer.write(&k);
       writer.finish();
       binaryReader = new BinaryKmerReader<keyType>(binaryfilename.c_str());
@@ -524,8 +532,8 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
   vector<MultivalueFileReaderWriter<uint64_t, uint16_t> *>
       grpreaders;  // must be 64-bit kmers, and 16-bit grpids.
   priority_queue<KIDpair> PQ;
-  bool combineMode = false;  // used when there are >=800 files;
-  uint32_t combineCount;     // split the file into combineCount groups,
+  bool combineMode;       // used when there are >=800 files;
+  uint32_t combineCount;  // split the file into combineCount groups,
   bool getFileIsSorted() { return true; }
   void groupFile(string fname, vector<string> lf, string prefix, string suffix,
                  int32_t idshift, bool useBinaryKmerFile, uint32_t KmerLength,
@@ -583,6 +591,7 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
                   const char *fnamesuffix, const char *tmpFileDirectory,
                   uint32_t KmerLength, uint32_t splitbit,
                   bool useBinaryKmerFile = true) {
+    combineMode = false;
     FileReader<keyType, valueType>::helper =
         new ConstantLengthKmerHelper<keyType, valueType>(KmerLength, splitbit);
     FILE *fNCBI;
