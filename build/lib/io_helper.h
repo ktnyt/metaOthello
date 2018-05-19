@@ -571,9 +571,9 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
       uint32_t id = PQN.top().id;
       vector<uint16_t> ret;
       if (PQN.top().finished) {
-        for (auto r : readers) {
-          r->finish();
-          delete r;
+        for (int i = 0; i < readers.size(); ++i) {
+          readers[i]->finish();
+          delete readers[i];
         }
         writer->finish();
         delete writer;
@@ -701,7 +701,8 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
     IDLfname += "IDList.txt";
     FILE *IDLf;
     IDLf = fopen(IDLfname.c_str(), "w");
-    for (int t : localshift) {
+    for (int i = 0; i < localshift.size(); ++i) {
+      int t = localshift[i];
       fprintf(IDLf, "%d\n", t);
     }
     fclose(IDLf);
