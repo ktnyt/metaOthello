@@ -513,7 +513,7 @@ class taxoTreeBuilder : public FileReader<keyType, valueType> {
   vector<int> stID;
   struct KIDpair {
     keyType k;
-    uint32_t id;
+    size_t id;
     bool finished;
     bool friend operator<(const KIDpair &a, const KIDpair &b) {
       if (a.finished != b.finished)
