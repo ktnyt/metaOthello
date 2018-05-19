@@ -41,8 +41,7 @@ class Othello {
   Hasher32<keyType> Ha;  //<! hash function Ha
   Hasher32<keyType> Hb;  //<! hash function Hb
   bool build;            //!< true if Othello is successfully built.
-  uint32_t trycount =
-      0;  //!< number of rehash before a valid hash pair is found.
+  uint32_t trycount;  //!< number of rehash before a valid hash pair is found.
   DisjointSet
       disj;  //!< Disjoint Set data structure that helps to test the acyclicity.
   vector<uint32_t> fillcount;  //!< Enabled only when the values of the query is
@@ -54,8 +53,8 @@ class Othello {
                                 //!< during construction.
   vector<keyType> removedKeys;  //!< The list of removed keys.
  private:
-  bool autoclear = false;  //!<  clears the memory allocated during construction
-                           //!<  automatically.
+  bool autoclear;  //!<  clears the memory allocated during construction
+                   //!<  automatically.
   keyType *keys;
   /*!
    * \brief Get the consecutive L bits starting from location loc*L bit.
@@ -164,6 +163,8 @@ class Othello {
           void *_values = NULL, size_t _valuesize = 0,
           int32_t _allowed_conflicts = -1) {
     build = false;
+    trycount = 0;
+    autoclear = false;
     allowed_conflicts = _allowed_conflicts;
     L = _L;
     autoclear = _autoclear;
@@ -316,11 +317,11 @@ class Othello {
                               //!< for array A, if x<L; otherwise, for arrayB.
   vector<double>
   getRatio();  //!<\brief returns vector, length = L. position x: the
-               //!<probability that query return 1 on the x-th lowest bit.
+               //!< probability that query return 1 on the x-th lowest bit.
 
   void
   randomflip();  //!<\brief adjust the array so that for random alien query,
-                 //!<returns 0 or 1 with equal probability on each bit.
+                 //!< returns 0 or 1 with equal probability on each bit.
   /*!
     \brief adjust the array so that for random alien query, return 1 with
     probability that is close to the *ideal* value. \param [in] double ideal. \n
