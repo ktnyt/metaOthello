@@ -42,7 +42,8 @@ class MulOth {
     }
     vOths[groupid] = poth;
     if ((poth->removedKeys).size() > 0) {
-      for (keyType k : poth->removedKeys) {
+      for (int i = 0; i < poth->removedKeys.size(); ++i) {
+        keyType k = poth->removedKeys[i];
         keyType fullk;
         helper->combgrp(fullk, groupid, k);
         printf("Key in Grp %x : %llx is removed \n", groupid, fullk);
@@ -187,7 +188,9 @@ class MulOth {
   }
   void printall() {
     printf("Printall ...\n");
-    for (auto V : vOths) V.printall();
+    for (int i = 0; i < vOths.size(); ++i) {
+      vOths[i].printall();
+    }
   }
   /*! \brief write Grouped l-Othello to a file.
    \note file structure. \n
@@ -284,7 +287,7 @@ class MulOth {
     buildsucc = true;
   }
   ~MulOth() {
-    for (auto p : vOths) delete p;
+    for (int i = 0; i < vOths.size(); ++i) delete vOths[i];
   }
 };
 
